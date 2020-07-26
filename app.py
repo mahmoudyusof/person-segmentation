@@ -54,8 +54,9 @@ def index():
         req = request_string
 
     input_image = base64.b64decode(req)
-    im = Image.open(io.BytesIO(input_image))
+    im = np.asarray(Image.open(io.BytesIO(input_image)))
     # return request.json.get("img")
+
     outputs = predictor(im)
 
     classes = outputs["instances"].pred_classes.tolist()
@@ -69,12 +70,11 @@ def index():
     persons = persons.clip(0, 1).reshape(
         persons.shape[0], persons.shape[1], 1).astype("uint8")
 
-    img = np.dstack((img, persons*255))
-    img = Image.fromarray(img)
+    im = np.dstack((im, persons*255))
+    im = Image.fromarray(im)
 
     buffer = io.BytesIO()
-    img.save(buffer, format="PNG")
-    img.save("file.png")
+    im.save(buffer, format="PNG")
     response = base64.b64encode(buffer.getvalue())
     return {"res": "data:image/png;base64," + str(response)[2:-1]}
 
