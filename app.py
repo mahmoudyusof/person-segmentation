@@ -3,7 +3,6 @@ import numpy as np
 from PIL import Image
 import os
 import json
-import cv2
 import random
 import base64
 from flask import Flask, jsonify
@@ -56,7 +55,6 @@ def index():
 
     input_image = base64.b64decode(req)
     im = Image.open(io.BytesIO(input_image))
-    im = cv2.cvtColor(np.array(im), cv2.COLOR_RGB2BGR)
     # return request.json.get("img")
     outputs = predictor(im)
 
@@ -71,7 +69,6 @@ def index():
     persons = persons.clip(0, 1).reshape(
         persons.shape[0], persons.shape[1], 1).astype("uint8")
 
-    img = cv2.cvtColor(im, cv2.COLOR_BGR2RGB)
     img = np.dstack((img, persons*255))
     img = Image.fromarray(img)
 
