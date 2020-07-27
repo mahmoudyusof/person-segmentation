@@ -2,5 +2,7 @@ Flask==1.1.1
 detectron2==0.2
 --find-links https://download.pytorch.org/whl/torch_stable.html
 torch==1.5.0+cpu
+torchvision
 --find-links https://dl.fbaipublicfiles.com/detectron2/wheels/cpu/torch1.5/index.html
 detectron2==0.2
+
