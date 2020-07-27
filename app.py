@@ -6,8 +6,8 @@ import json
 import random
 import base64
 from flask import Flask, jsonify
-from flask import request
-from flask_cors import CORS
+from flask import request, Response
+# from flask_cors import CORS
 import torch
 import torchvision
 
@@ -34,15 +34,21 @@ predictor = DefaultPredictor(cfg)
 
 
 app = Flask(__name__)
-CORS(app)
+# CORS(app)
 
 @app.route("/", methods=['GET', 'POST', 'OPTIONS'])
 def index():
+    res = Response(headers={
+        "Access-Control-Allow-Origin": "*",
+        "Access-Control-Allow-Headers": "Content-Type, X-Requested-With",
+        "Access-Control-Allow-Methods": "POST, OPTIONS"
+        })
     req = request.get_json()
     if type(req) is dict:
         request_string = req['img']
     else:
-        return "Invalid Request"
+        res.data = "Invalid Request"
+        return res
     # return str(request.get_json())
     key = "base64,"
     index = request_string.find(key)
@@ -64,7 +70,9 @@ def index():
                         for x in range(len(classes)) if classes[x] == 0])
 
     if(len(persons) == 0):
-        return jsonify({"res": original_mime + req})
+        res.mimetype = "application/json"
+        res.data = json.dumps({"res": original_mime + req})
+        return res
 
     persons = persons.sum(axis=0)
     persons = persons.clip(0, 1).reshape(
@@ -76,7 +84,9 @@ def index():
     buffer = io.BytesIO()
     im.save(buffer, format="PNG")
     response = base64.b64encode(buffer.getvalue())
-    return {"res": "data:image/png;base64," + str(response)[2:-1]}
+    res.mimetype = "application/json"
+    res.data = json.dumps({"res": "data:image/png;base64," + str(response)[2:-1]})
+    return res
 
 
 if __name__ == "__main__":
